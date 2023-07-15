@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  database:
+    container_name: postgres
+    image: postgres
+    env_file: .env
+    environment:
+        - POSTGRES_DB=${POSTGRES_DB}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+        - "${POSTGRES_PORT}:5432"
+    volumes:
+        - postgres:/var/lib/postgresql/data
+    networks:
+      - web-network
+
+  web:
+    container_name: django
+    build: .
+    env_file: .env
+    working_dir: /code
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "9000:8000"
+    depends_on:
+      - database
+    networks:
+      - web-network
+
+volumes:
+  postgres:   
+
+networks:
+  web-network:
+    driver: bridge
